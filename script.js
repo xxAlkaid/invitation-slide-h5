@@ -181,6 +181,33 @@ class VerticalSlider {
       return;
     }
 
+    // 获取容器的实际尺寸（使用 container 的宽高，而不是 window）
+    const containerRect = this.container.getBoundingClientRect();
+    const containerWidth = containerRect.width;
+    const containerHeight = containerRect.height;
+
+    // 如果容器尺寸无效，不设置缩放
+    if (containerWidth <= 0 || containerHeight <= 0) {
+      this.imageScale = null;
+      return;
+    }
+
+    // 计算容器和图片的宽高比
+    const containerAspectRatio = containerWidth / containerHeight;
+    const imageAspectRatio = this.imageWidth / this.imageHeight;
+
+    // 允许的比例误差
+    const ratioThreshold = 0.001;
+
+    // 如果容器和图片宽高比一致，根据图片整体的宽高进行缩放
+    if (Math.abs(containerAspectRatio - imageAspectRatio) < ratioThreshold) {
+      // 比例一致时，根据图片整体尺寸计算缩放，让图片整体填满容器
+      const scaleX = containerWidth / this.imageWidth;
+      this.imageScale = scaleX;
+      return;
+    }
+
+    // 如果比例不一致，根据主体内容区域进行缩放
     // 主体内容区域的安全边距
     const safeMarginTop = 50;
     const safeMarginBottom = 50;
@@ -191,19 +218,15 @@ class VerticalSlider {
     const contentWidth = this.imageWidth - safeMarginLeft - safeMarginRight;
     const contentHeight = this.imageHeight - safeMarginTop - safeMarginBottom;
 
-    // 屏幕尺寸
-    const screenWidth = window.innerWidth;
-    const screenHeight = window.innerHeight;
-
     // 如果内容区域尺寸无效，不设置缩放
     if (contentWidth <= 0 || contentHeight <= 0) {
       this.imageScale = null;
       return;
     }
 
-    // 计算缩放比例：使得主体内容区域填满屏幕
-    const scaleX = screenWidth / contentWidth;
-    const scaleY = screenHeight / contentHeight;
+    // 计算缩放比例：使得主体内容区域填满容器
+    const scaleX = containerWidth / contentWidth;
+    const scaleY = containerHeight / contentHeight;
 
     // 取较小值，确保主体内容区域完全显示且不被裁剪
     this.imageScale = Math.min(scaleX, scaleY);
