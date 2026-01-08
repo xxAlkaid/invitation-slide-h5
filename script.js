@@ -26,10 +26,12 @@ class VerticalSlider {
     this.maxAnimationCount = 3;
 
     // 图片缩放相关
+    // 如果提供了固定图片尺寸，直接使用，不需要等待图片加载
+    this.imageWidth = options.imageWidth || 750; // 默认 750
+    this.imageHeight = options.imageHeight || 1624; // 默认 1624
     this.imageScale = null;
-    this.imageWidth = null;
-    this.imageHeight = null;
     this.scaleCalculated = false;
+    this.fixedImageSize = !!(options.imageWidth && options.imageHeight); // 是否使用固定尺寸
 
     this.init();
   }
@@ -40,6 +42,18 @@ class VerticalSlider {
   init () {
     this.createSlides();
     this.bindEvents();
+    
+    // 如果使用固定图片尺寸，立即计算缩放比例（不需要等待图片加载）
+    if (this.fixedImageSize) {
+      this.calculateScale();
+      this.scaleCalculated = true;
+      // 应用缩放到所有已创建的图片
+      const images = this.slideWrapper.querySelectorAll('img');
+      images.forEach(img => {
+        this.applyScale(img);
+      });
+    }
+    
     this.updateSlidePosition();
     this.hideLoading();
   }
@@ -156,21 +170,39 @@ class VerticalSlider {
 
   /**
    * 处理图片加载
-   * 如果是第一张加载完成的图片，计算缩放比例
+   * 如果是第一张加载完成的图片，计算缩放比例（只计算一次）
    * 然后应用缩放比例到所有图片
    */
   handleImageLoad (img) {
+    // 如果使用固定尺寸，不需要等待图片加载，直接应用
+    if (this.fixedImageSize) {
+      if (this.scaleCalculated) {
+        this.applyScale(img);
+      }
+      return;
+    }
+    
     // 如果还没有计算过缩放比例，且这张图片已加载完成
     if (!this.scaleCalculated && img.complete && img.naturalWidth && img.naturalHeight) {
-      // 保存图片尺寸（假设所有图片尺寸相同）
+      // 保存图片尺寸（所有图片尺寸相同，只保存一次）
       this.imageWidth = img.naturalWidth;
       this.imageHeight = img.naturalHeight;
-      // 计算缩放比例
+      // 计算缩放比例（只计算一次）
       this.calculateScale();
       this.scaleCalculated = true;
+      
+      // 立即应用缩放比例到所有已存在的图片
+      const allImages = this.slideWrapper.querySelectorAll('img');
+      allImages.forEach(image => {
+        this.applyScale(image);
+      });
+      return; // 已经批量应用了，不需要单独应用
     }
-    // 应用缩放比例到当前图片
-    this.applyScale(img);
+    
+    // 如果已经计算过缩放比例，直接应用到当前图片
+    if (this.scaleCalculated) {
+      this.applyScale(img);
+    }
   }
 
   /**
@@ -256,11 +288,23 @@ class VerticalSlider {
 
   /**
    * 计算缩放比例并应用到所有图片
+   * 用于窗口resize时重新计算
    */
   calculateAndApplyScale () {
+    // 如果使用固定尺寸，图片尺寸已经知道，直接重新计算缩放比例
+    if (this.fixedImageSize || (this.imageWidth && this.imageHeight)) {
+      // 重新计算缩放比例（容器尺寸可能已改变）
+      this.calculateScale();
+      // 应用缩放比例到所有图片
+      const images = this.slideWrapper.querySelectorAll('img');
+      images.forEach(img => {
+        this.applyScale(img);
+      });
+      return;
+    }
+
+    // 如果图片尺寸还不知道（未使用固定尺寸），找到第一张已加载完成的图片
     const images = this.slideWrapper.querySelectorAll('img');
-    
-    // 找到第一张已加载完成的图片来计算缩放比例
     let firstLoadedImg = null;
     for (const img of images) {
       if (img.complete && img.naturalWidth && img.naturalHeight) {
@@ -270,16 +314,18 @@ class VerticalSlider {
     }
 
     if (firstLoadedImg) {
+      // 保存图片尺寸（所有图片尺寸相同，只保存一次）
       this.imageWidth = firstLoadedImg.naturalWidth;
       this.imageHeight = firstLoadedImg.naturalHeight;
+      // 计算缩放比例（只计算一次）
       this.calculateScale();
       this.scaleCalculated = true;
+      
+      // 应用缩放比例到所有图片
+      images.forEach(img => {
+        this.applyScale(img);
+      });
     }
-
-    // 应用缩放比例到所有图片
-    images.forEach(img => {
-      this.applyScale(img);
-    });
   }
 
   /**
@@ -508,6 +554,9 @@ document.addEventListener('DOMContentLoaded', () => {
     : TOTAL_IMAGES;
 
   new VerticalSlider({
-    totalSlides: totalSlides
+    totalSlides: totalSlides,
+    // 固定图片尺寸：750 × 1624（所有图片尺寸相同）
+    imageWidth: 750,
+    imageHeight: 1624
   });
 });
