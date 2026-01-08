@@ -94,25 +94,38 @@ body {
 
 /* 呼吸效果 - 轻微的缩放变化 */
 @keyframes arrowBreathe {
-  0%,
-  100% {
+  0%, 18.18%, 36.36%, 54.55%, 100% {
     transform: translateX(-50%) scale(1);
   }
-  50% {
+  9.09%, 27.27%, 45.45% {
     transform: translateX(-50%) scale(1.15);
   }
 }
 
-/* 淡入淡出效果 - 从0到1再到0 */
+/* 淡入淡出效果 - 3次动画（每次2秒）+ 5秒空白 = 11秒总周期 */
+/* 0-2s: 第一次 (0-1-0), 2-4s: 第二次 (0-1-0), 4-6s: 第三次 (0-1-0), 6-11s: 空白 */
+/* 每次动画1秒淡入 + 1秒淡出 */
 @keyframes arrowFade {
   0% {
     opacity: 0;
   }
-  50% {
-    opacity: 1;
+  9.09% {
+    opacity: 1; /* 第一次峰值 (1s / 11s) */
   }
-  100% {
-    opacity: 0;
+  18.18% {
+    opacity: 0; /* 第一次结束 (2s / 11s) */
+  }
+  27.27% {
+    opacity: 1; /* 第二次峰值 (3s / 11s) */
+  }
+  36.36% {
+    opacity: 0; /* 第二次结束 (4s / 11s) */
+  }
+  45.45% {
+    opacity: 1; /* 第三次峰值 (5s / 11s) */
+  }
+  54.55%, 100% {
+    opacity: 0; /* 第三次结束及空白期 (6s-11s / 11s) */
   }
 }
 
@@ -125,14 +138,14 @@ body {
       drop-shadow(0 0 20px rgba(255, 255, 255, 0.15))
       drop-shadow(0 0 30px rgba(255, 255, 255, 0.1));
   }
-  50% {
+  9.09%, 27.27%, 45.45% {
     filter: drop-shadow(0 0 6px rgba(255, 255, 255, 1))
       drop-shadow(0 0 12px rgba(255, 255, 255, 0.8))
       drop-shadow(0 0 18px rgba(255, 255, 255, 0.6))
       drop-shadow(0 0 28px rgba(255, 255, 255, 0.4))
       drop-shadow(0 0 40px rgba(255, 255, 255, 0.3));
   }
-  100% {
+  18.18%, 36.36%, 54.55%, 100% {
     filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.4))
       drop-shadow(0 0 8px rgba(255, 255, 255, 0.3))
       drop-shadow(0 0 12px rgba(255, 255, 255, 0.2))
@@ -142,11 +155,11 @@ body {
 }
 
 .scroll-arrow.animating {
-  animation: arrowBreathe 3s ease-in-out;
+  animation: arrowBreathe 11s ease-in-out infinite;
 }
 
 .scroll-arrow.animating svg {
-  animation: arrowFade 3s ease-in-out, arrowGlow 3s ease-in-out;
+  animation: arrowFade 11s ease-in-out infinite, arrowGlow 11s ease-in-out infinite;
 }
 
 @media (max-width: 768px) {

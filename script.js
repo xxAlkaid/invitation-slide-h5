@@ -21,9 +21,6 @@ class VerticalSlider {
     this.slideWrapper = document.getElementById('slideWrapper');
     this.loading = document.getElementById('loading');
     this.scrollArrow = document.getElementById('scrollArrow');
-    this.arrowTimer = null;
-    this.arrowAnimationCount = 0;
-    this.maxAnimationCount = 3;
 
     // 图片缩放相关
     // 如果提供了固定图片尺寸，直接使用，不需要等待图片加载
@@ -405,110 +402,22 @@ class VerticalSlider {
    * 更新指示箭头
    */
   updateArrow () {
-    // 清除之前的定时器
-    if (this.arrowTimer) {
-      clearTimeout(this.arrowTimer);
-      this.arrowTimer = null;
-    }
-
-    // 移除动画类
-    this.scrollArrow.classList.remove('animating');
-
-    // 清理之前的动画结束监听器
-    const svg = this.scrollArrow.querySelector('svg');
-    if (svg && svg._animationEndHandler) {
-      svg.removeEventListener('animationend', svg._animationEndHandler);
-      svg._animationEndHandler = null;
-    }
-
-    // 如果是最后一张图片，隐藏箭头
+    // 如果是最后一张图片，隐藏箭头并停止动画
     if (this.currentIndex >= this.totalSlides - 1) {
       this.scrollArrow.classList.remove('visible');
-      this.arrowAnimationCount = 0;
-      return;
-    }
-
-    // 重置动画计数器（切换到新页面时）
-    this.arrowAnimationCount = 0;
-
-    // 显示箭头容器
-    this.scrollArrow.classList.add('visible');
-
-    // 确保初始opacity为0
-    if (svg) {
-      svg.style.opacity = '0';
-    }
-
-    // 开始执行动画（每页执行3次）
-    this.startArrowBlink();
-  }
-
-  /**
-   * 开始箭头动画
-   * 淡入淡出 + 呼吸效果：opacity从0到1再到0（3秒）
-   * 每页连续执行3次后，空白5秒，然后重播
-   */
-  startArrowBlink () {
-    // 检查是否还在当前页面（用户可能已经切换了）
-    if (this.currentIndex >= this.totalSlides - 1) {
-      return;
-    }
-
-    // 检查是否已达到最大执行次数
-    if (this.arrowAnimationCount >= this.maxAnimationCount) {
-      // 停止动画，保持opacity为0
       this.scrollArrow.classList.remove('animating');
-      const svg = this.scrollArrow.querySelector('svg');
-      if (svg) {
-        svg.style.opacity = '0';
-      }
-
-      // 空白5秒后，重置计数器并重新开始
-      this.arrowTimer = setTimeout(() => {
-        this.arrowAnimationCount = 0;
-        this.startArrowBlink();
-      }, 5000); // 空白5秒
-
       return;
     }
 
-    // 增加执行次数
-    this.arrowAnimationCount++;
-
-    // 移除之前的动画结束监听器（如果存在）
-    const svg = this.scrollArrow.querySelector('svg');
-    if (svg && svg._animationEndHandler) {
-      svg.removeEventListener('animationend', svg._animationEndHandler);
-    }
-
-    // 移除动画类，然后重新添加以确保动画重新开始
+    // 显示箭头容器并开始动画（CSS会自动处理3次+5秒空白的循环）
+    this.scrollArrow.classList.add('visible');
+    
+    // 移除动画类后重新添加，确保动画重新开始
     this.scrollArrow.classList.remove('animating');
-
     // 使用 requestAnimationFrame 确保动画类已完全移除后再添加
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         this.scrollArrow.classList.add('animating');
-
-        // 监听动画结束事件
-        if (svg) {
-          svg._animationEndHandler = () => {
-            // 确保opacity为0
-            svg.style.opacity = '0';
-
-            // 检查是否还需要继续执行动画
-            if (this.arrowAnimationCount < this.maxAnimationCount &&
-              this.currentIndex < this.totalSlides - 1) {
-              // 立即继续执行下一次动画（无间隔）
-              this.startArrowBlink();
-            } else {
-              // 如果已达到3次，调用 startArrowBlink 来触发空白5秒后的重播
-              // startArrowBlink 会检测到 arrowAnimationCount >= maxAnimationCount
-              // 然后设置5秒定时器并重置计数器
-              this.startArrowBlink();
-            }
-          };
-          svg.addEventListener('animationend', svg._animationEndHandler);
-        }
       });
     });
   }
