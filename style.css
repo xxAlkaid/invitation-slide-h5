@@ -77,10 +77,12 @@ body {
   opacity: 1;
 }
 
-.scroll-arrow img {
+.scroll-arrow svg {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 2.5;
   opacity: 0; /* 初始状态为0，动画会控制透明度 */
   /* 多层荧光光晕效果 - 从内到外逐渐扩散 */
   filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.8))
@@ -143,7 +145,7 @@ body {
   animation: arrowBreathe 3s ease-in-out;
 }
 
-.scroll-arrow.animating img {
+.scroll-arrow.animating svg {
   animation: arrowFade 3s ease-in-out, arrowGlow 3s ease-in-out;
 }
 

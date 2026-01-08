@@ -346,10 +346,10 @@ class VerticalSlider {
     this.scrollArrow.classList.remove('animating');
 
     // 清理之前的动画结束监听器
-    const img = this.scrollArrow.querySelector('img');
-    if (img && img._animationEndHandler) {
-      img.removeEventListener('animationend', img._animationEndHandler);
-      img._animationEndHandler = null;
+    const svg = this.scrollArrow.querySelector('svg');
+    if (svg && svg._animationEndHandler) {
+      svg.removeEventListener('animationend', svg._animationEndHandler);
+      svg._animationEndHandler = null;
     }
 
     // 如果是最后一张图片，隐藏箭头
@@ -366,8 +366,8 @@ class VerticalSlider {
     this.scrollArrow.classList.add('visible');
 
     // 确保初始opacity为0
-    if (img) {
-      img.style.opacity = '0';
+    if (svg) {
+      svg.style.opacity = '0';
     }
 
     // 开始执行动画（每页执行3次）
@@ -389,9 +389,9 @@ class VerticalSlider {
     if (this.arrowAnimationCount >= this.maxAnimationCount) {
       // 停止动画，保持opacity为0
       this.scrollArrow.classList.remove('animating');
-      const img = this.scrollArrow.querySelector('img');
-      if (img) {
-        img.style.opacity = '0';
+      const svg = this.scrollArrow.querySelector('svg');
+      if (svg) {
+        svg.style.opacity = '0';
       }
 
       // 空白5秒后，重置计数器并重新开始
@@ -407,9 +407,9 @@ class VerticalSlider {
     this.arrowAnimationCount++;
 
     // 移除之前的动画结束监听器（如果存在）
-    const img = this.scrollArrow.querySelector('img');
-    if (img && img._animationEndHandler) {
-      img.removeEventListener('animationend', img._animationEndHandler);
+    const svg = this.scrollArrow.querySelector('svg');
+    if (svg && svg._animationEndHandler) {
+      svg.removeEventListener('animationend', svg._animationEndHandler);
     }
 
     // 移除动画类，然后重新添加以确保动画重新开始
@@ -421,10 +421,10 @@ class VerticalSlider {
         this.scrollArrow.classList.add('animating');
 
         // 监听动画结束事件
-        if (img) {
-          img._animationEndHandler = () => {
+        if (svg) {
+          svg._animationEndHandler = () => {
             // 确保opacity为0
-            img.style.opacity = '0';
+            svg.style.opacity = '0';
 
             // 检查是否还需要继续执行动画
             if (this.arrowAnimationCount < this.maxAnimationCount &&
@@ -438,7 +438,7 @@ class VerticalSlider {
               this.startArrowBlink();
             }
           };
-          img.addEventListener('animationend', img._animationEndHandler);
+          svg.addEventListener('animationend', svg._animationEndHandler);
         }
       });
     });
